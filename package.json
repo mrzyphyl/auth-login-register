@@ -10,9 +10,12 @@
   "author": "Job Gian Dispo",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "colors": "^1.4.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "mongodb": "^6.0.0",
     "mongoose": "^7.5.0"
   },
   "devDependencies": {
