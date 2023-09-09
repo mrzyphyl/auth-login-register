@@ -4,7 +4,7 @@ const {  getUser, postUser, editPassword, loginUser } = require('../controller/l
 
 router.route('/').get(getUser).post(postUser)
 
-router.route('/login').get(loginUser)
+router.route('/login').post(loginUser)
 
 router.route('/:id').put(editPassword)
 

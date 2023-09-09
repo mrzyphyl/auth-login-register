@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler')
-const bcrypt = require('bcrypt')
 const User = require('../models/userModel')
+const CrytpoJS = require('crypto-js')
 
 //Get User Data
 //@route GET /api/user
@@ -15,17 +15,23 @@ const getUser = asyncHandler (async (req, res) => {
 //@access Public
 const loginUser = asyncHandler (async (req, res) => {
     let { Email, Password } = req.body
+    const bytes  = CrytpoJS.AES.decrypt(Password, 'secret key 123')
+    const originalPass = bytes.toString(CrytpoJS.enc.Utf8)
+    
+    const compare = () => {
+        originalPass === Password
+    }
 
-    if(!Email && !Password){
+    if(!Email && !compare){
         res.status(400)
         throw new Error('Please add all fields')
     }
 
     //Check if user exist
-    const userExist = await User.findOne({Email, Password})
+    const userExist = await User.findOne({Email, compare})
 
     if(userExist){
-        const getUser = await User.find({User})
+        const getUser = await User.findOne(userExist)
         res.status(200).json(getUser)
     } else {
         res.status(400)
@@ -53,12 +59,14 @@ const postUser = asyncHandler (async (req, res) => {
         throw new Error('User already exists')
     }
 
+    const cipher = CrytpoJS.AES.encrypt(Password, 'secret key 123').toString()
+
     const user = await User.create({
         FirstName,
         LastName,
         Age,
         Email,
-        Password
+        Password: cipher
     })
 
     if(user){
@@ -68,7 +76,7 @@ const postUser = asyncHandler (async (req, res) => {
             LastName: user.LastName,
             Age: user.Age,
             Email: user.Email,
-            Password: user.Password
+            Password: user.cipher
         })
     } else {
         res.status(400)
@@ -88,10 +96,12 @@ const editPassword = asyncHandler (async (req, res) => {
         throw new Error('User not found')
     }
 
-    const editUserPassword = await User.findByIdAndUpdate(req.params.id, req.body, {
-        new: true
-    })
-
+    const cipher = CrytpoJS.AES.encrypt(req.body.Password, 'secret key 123').toString()
+    const editUserPassword = await User.findByIdAndUpdate(
+        req.params.id,
+        {Password: cipher},
+        {new: true}
+    )
     res.status(200).json(editUserPassword)
 })
 
